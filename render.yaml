@@ -21,12 +21,13 @@ services:
         value: https://ai-resume-analyzer-frontend.onrender.com
       - key: TRUSTED_HOSTS
         value: ai-resume-analyzer-backend.onrender.com,localhost,127.0.0.1
-
-staticSites:
-  - name: ai-resume-analyzer-frontend
+  - type: web
+    name: ai-resume-analyzer-frontend
+    runtime: static
     plan: free
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/build
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: build
     envVars:
       - key: REACT_APP_API_BASE_URL
         value: https://ai-resume-analyzer-backend.onrender.com/api
