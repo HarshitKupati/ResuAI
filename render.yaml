@@ -22,8 +22,8 @@ services:
       - key: TRUSTED_HOSTS
         value: ai-resume-analyzer-backend.onrender.com,localhost,127.0.0.1
 
-  - type: static
-    name: ai-resume-analyzer-frontend
+staticSites:
+  - name: ai-resume-analyzer-frontend
     plan: free
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: frontend/build
