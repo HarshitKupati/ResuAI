@@ -20,7 +20,7 @@ services:
       - key: CORS_ALLOWED_ORIGINS
         value: https://ai-resume-analyzer-frontend.onrender.com
       - key: TRUSTED_HOSTS
-        value: ai-resume-analyzer-backend.onrender.com,localhost,127.0.0.1
+        value: '*.onrender.com,localhost,127.0.0.1'
       - key: OPENAI_API_KEY
         sync: false
       - key: OPENAI_MODEL
