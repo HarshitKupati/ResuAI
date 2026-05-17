@@ -141,8 +141,8 @@ export default function History({ onNavigate }) {
             }
           />
         ) : (
-          <div className="overflow-x-auto -mx-2">
-            <table className="min-w-full text-sm">
+          <div className="overflow-x-auto md:-mx-2">
+            <table className="table-responsive min-w-full text-sm">
               <thead>
                 <tr className="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
                   <th className="px-2 py-2.5 w-8">
@@ -171,7 +171,7 @@ export default function History({ onNavigate }) {
                       key={h.analysis_id}
                       className={`hover:bg-slate-50/60 ${isSel ? 'bg-brand-50/40' : ''}`}
                     >
-                      <td className="px-2 py-3">
+                      <td data-label="Select" className="px-2 py-3">
                         <input
                           type="checkbox"
                           className="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500 cursor-pointer"
@@ -180,25 +180,27 @@ export default function History({ onNavigate }) {
                           aria-label="Select row"
                         />
                       </td>
-                      <td className="px-2 py-3 text-slate-600 whitespace-nowrap">
+                      <td data-label="Date" className="px-2 py-3 text-slate-600 whitespace-nowrap">
                         {new Date(h.created_at).toLocaleString()}
                       </td>
-                      <td className="px-2 py-3">
+                      <td data-label="Match" className="px-2 py-3">
                         <Badge tone={scoreTone(h.match_score)}>{Math.round(h.match_score)}%</Badge>
                       </td>
-                      <td className="px-2 py-3">
+                      <td data-label="ATS" className="px-2 py-3">
                         <Badge tone={scoreTone(h.ats_score)}>{Math.round(h.ats_score)}%</Badge>
                       </td>
-                      <td className="px-2 py-3 text-slate-700">
+                      <td data-label="Top Role" className="px-2 py-3 text-slate-700">
                         {h.predicted_roles?.[0]?.role || '—'}
                       </td>
-                      <td className="px-2 py-3 text-slate-600">
-                        {(h.missing_skills || []).slice(0, 3).join(', ') || '—'}
-                        {h.missing_skills?.length > 3 && (
-                          <span className="text-slate-400"> +{h.missing_skills.length - 3}</span>
-                        )}
+                      <td data-label="Missing" className="px-2 py-3 text-slate-600">
+                        <span className="text-right md:text-left">
+                          {(h.missing_skills || []).slice(0, 3).join(', ') || '—'}
+                          {h.missing_skills?.length > 3 && (
+                            <span className="text-slate-400"> +{h.missing_skills.length - 3}</span>
+                          )}
+                        </span>
                       </td>
-                      <td className="px-2 py-3 text-right whitespace-nowrap">
+                      <td data-label="" className="px-2 py-3 text-right whitespace-nowrap">
                         <button
                           onClick={() => download(h.analysis_id)}
                           className="btn-ghost text-brand-600 hover:bg-brand-50 px-2 py-1.5"

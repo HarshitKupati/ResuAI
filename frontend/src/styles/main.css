@@ -74,9 +74,10 @@
   .subtle      { @apply text-sm text-slate-500; }
   .kbd         { @apply inline-flex items-center px-1.5 py-0.5 rounded border border-slate-300 bg-slate-50 text-[10px] font-mono text-slate-600; }
 
-  /* Gradient text (for hero titles etc.) */
+  /* Gradient text (for hero titles etc.) — deep, high-contrast stops so the
+     text stays readable on light pastel backgrounds. */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-brand-500 to-accent-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-700 via-brand-600 to-accent-700;
   }
 
   /* ---------- Navigation ---------- */
@@ -145,11 +146,57 @@
 
 /* Prevent text/element overflow on mobile */
 @media (max-width: 640px) {
-  .h1, .h2 {
-    font-size: 1.5rem !important;
-    line-height: 1.2 !important;
-  }
+  .h1 { font-size: 1.625rem !important; line-height: 1.2 !important; }
+  .h2 { font-size: 1.375rem !important; line-height: 1.25 !important; }
+  .h3 { font-size: 1.125rem !important; }
   .dropzone {
     @apply p-6;
+  }
+  .page-container {
+    @apply px-3 py-4;
+  }
+  /* Tighter card padding on phones */
+  .card-pad { @apply p-4; }
+}
+
+/* ---------- Responsive data tables (table -> card stack on mobile) ---------- */
+/* Add the .table-responsive class to a <table>; below md it converts to a card stack
+   with the original column header revealed via data-label attribute on each <td>. */
+@media (max-width: 767px) {
+  table.table-responsive,
+  table.table-responsive thead,
+  table.table-responsive tbody,
+  table.table-responsive th,
+  table.table-responsive td,
+  table.table-responsive tr {
+    display: block;
+    width: 100%;
+  }
+  table.table-responsive thead {
+    display: none;
+  }
+  table.table-responsive tr {
+    @apply rounded-xl ring-1 ring-slate-200 bg-white shadow-soft mb-3 p-1;
+  }
+  table.table-responsive td {
+    @apply flex justify-between items-center gap-3 px-3 py-2 border-0;
+    text-align: right;
+  }
+  table.table-responsive td::before {
+    content: attr(data-label);
+    @apply text-[11px] uppercase tracking-wider font-semibold text-slate-500;
+    text-align: left;
+    flex: 0 0 auto;
+  }
+  table.table-responsive td[data-label=""]::before,
+  table.table-responsive td:not([data-label])::before {
+    content: "";
+  }
+}
+
+/* Improve tap targets on mobile */
+@media (hover: none) and (pointer: coarse) {
+  button, a, [role="button"] {
+    -webkit-tap-highlight-color: transparent;
   }
 }

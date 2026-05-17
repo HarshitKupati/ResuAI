@@ -19,6 +19,8 @@ from .routers import (
     ai_routes,
     analysis_routes,
     profile_routes,
+    chat_routes,
+    roadmap_routes,
 )
 from .database import connect_to_mongo, close_mongo_connection, get_database
 
@@ -70,7 +72,7 @@ raw_origins = os.getenv("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://12
 allowed_origins = [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 allow_origin_regex = os.getenv(
     "CORS_ALLOWED_ORIGIN_REGEX",
-    r"^https?://(localhost|127\.0\.0\.1)(:\\d+)?$"
+    r"^https?://(localhost|127\.0\.0\.1)(:\d+)?$"
 )
 raw_trusted_hosts = os.getenv("TRUSTED_HOSTS", "localhost,127.0.0.1")
 trusted_hosts = [host.strip() for host in raw_trusted_hosts.split(",") if host.strip()]
@@ -134,6 +136,8 @@ app.include_router(auth_routes.router, prefix="/api/auth", tags=["Authentication
 app.include_router(analysis_routes.router, prefix="/api", tags=["Analysis Pipeline"])
 app.include_router(profile_routes.router, prefix="/api", tags=["User Profile"])
 app.include_router(ai_routes.router, prefix="/api", tags=["AI Features"])
+app.include_router(chat_routes.router, prefix="/api", tags=["AI Chat"])
+app.include_router(roadmap_routes.router, prefix="/api", tags=["Saved Roadmaps"])
 
 
 @app.get("/")

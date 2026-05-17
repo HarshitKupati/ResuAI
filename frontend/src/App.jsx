@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Analyze from './pages/Analyze';
 import BulkAnalyze from './pages/BulkAnalyze';
 import History from './pages/History';
+import Explorer from './pages/Explorer';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
@@ -88,6 +89,7 @@ export default function App() {
         >
           {activeTab === 'home' && <Home user={user} onNavigate={setActiveTab} />}
           {activeTab === 'dashboard' && <Dashboard user={user} onNavigate={setActiveTab} />}
+          {activeTab === 'explorer' && <Explorer />}
           {activeTab === 'analyze' && <Analyze />}
           {activeTab === 'bulk' && <BulkAnalyze />}
           {activeTab === 'history' && <History onNavigate={setActiveTab} />}

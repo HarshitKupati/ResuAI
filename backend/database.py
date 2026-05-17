@@ -68,6 +68,8 @@ async def _ensure_indexes() -> None:
         # Password reset records: lookup by email + auto-expire when expires_at passes
         await database.password_resets.create_index("email")
         await database.password_resets.create_index("expires_at", expireAfterSeconds=0)
+        await database.chat_sessions.create_index([("user_id", 1), ("updated_at", -1)])
+        await database.saved_roadmaps.create_index([("user_id", 1), ("created_at", -1)])
         logger.info("MongoDB indexes ensured")
     except Exception as exc:
         logger.warning("Index creation skipped: %s", exc)
@@ -130,3 +132,17 @@ def get_password_resets_collection():
     if database is None:
         return None
     return database.password_resets
+
+
+def get_chat_sessions_collection():
+    """Get chat_sessions collection (Role Coach chat history per user)."""
+    if database is None:
+        return None
+    return database.chat_sessions
+
+
+def get_saved_roadmaps_collection():
+    """Get saved_roadmaps collection (per-user persisted role guides)."""
+    if database is None:
+        return None
+    return database.saved_roadmaps

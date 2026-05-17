@@ -487,7 +487,7 @@ function AnalysisResults({ result, onReset, onDownload }) {
 function MultiJdBanner({ multi }) {
   if (!multi || multi.totalRequested <= 1) return null;
   return (
-    <Card className="p-5 bg-gradient-to-r from-brand-50 to-indigo-50 ring-1 ring-brand-200/60">
+    <Card className="p-5 bg-gradient-to-r from-brand-50 to-accent-50 ring-1 ring-brand-200/60">
       <div className="flex flex-wrap items-start gap-4 justify-between">
         <div className="flex items-start gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-600 text-white flex-shrink-0">

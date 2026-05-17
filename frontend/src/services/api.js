@@ -211,6 +211,126 @@ export const deleteUserProfile = async () => {
   return data;
 };
 
+// ============================================
+// AI: Role Explorer (career roadmap)
+// ============================================
+
+/**
+ * Fetch an AI-generated career roadmap for an arbitrary job role.
+ * @param {string} role e.g. "Data Scientist", "Cloud Engineer"
+ */
+export const getRoleGuide = async (role) => {
+  const { data } = await api.post('/ai/role-guide', { role });
+  return data?.data || null;
+};
+
+// ============================================
+// AI: Role Coach chat
+// ============================================
+
+export const listChatSessions = async () => {
+  const { data } = await api.get('/chat/sessions');
+  return data?.sessions || [];
+};
+
+export const getChatSession = async (sessionId) => {
+  const { data } = await api.get(`/chat/sessions/${sessionId}`);
+  return data;
+};
+
+export const deleteChatSession = async (sessionId) => {
+  const { data } = await api.delete(`/chat/sessions/${sessionId}`);
+  return data;
+};
+
+/**
+ * Send a message in a chat session.
+ * @param {string} message
+ * @param {string|null} sessionId  pass null/undefined to start a new session
+ */
+export const sendChatMessage = async (message, sessionId = null) => {
+  const payload = { message };
+  if (sessionId) payload.session_id = sessionId;
+  const { data } = await api.post('/chat/send', payload, { timeout: 60000 });
+  return data;
+};
+
+/**
+ * Discard the trailing assistant message in `sessionId` and ask the LLM
+ * for a new reply to the same preceding user prompt.
+ */
+export const regenerateLastReply = async (sessionId) => {
+  const { data } = await api.post(
+    '/chat/regenerate',
+    { session_id: sessionId },
+    { timeout: 60000 },
+  );
+  return data;
+};
+
+// ============================================
+// Saved roadmaps
+// ============================================
+
+export const saveRoadmap = async (guide) => {
+  // Strip out anything the backend doesn't accept (e.g. _note from fallback).
+  const payload = {
+    role: guide.role || '',
+    summary: guide.summary || '',
+    key_skills: guide.key_skills || [],
+    tools: guide.tools || [],
+    requirements: guide.requirements || [],
+    learning_path: (guide.learning_path || []).map((s) => ({
+      step: s.step || 1,
+      title: s.title || '',
+      duration: s.duration || '',
+      description: s.description || '',
+      resources: s.resources || [],
+    })),
+    estimated_time: guide.estimated_time || '',
+    career_growth: guide.career_growth || [],
+    source: guide.source || 'ai',
+  };
+  const { data } = await api.post('/roadmaps', payload);
+  return data?.roadmap || null;
+};
+
+export const listSavedRoadmaps = async () => {
+  const { data } = await api.get('/roadmaps');
+  return data?.roadmaps || [];
+};
+
+export const getSavedRoadmap = async (id) => {
+  const { data } = await api.get(`/roadmaps/${id}`);
+  return data?.roadmap || null;
+};
+
+export const deleteSavedRoadmap = async (id) => {
+  const { data } = await api.delete(`/roadmaps/${id}`);
+  return data;
+};
+
+/**
+ * Download a saved roadmap as a PDF and trigger a browser download.
+ */
+export const downloadRoadmapPdf = async (id, suggestedName) => {
+  const response = await api.get(`/roadmaps/${id}/pdf`, {
+    responseType: 'blob',
+    timeout: 60000,
+  });
+  const blob = new Blob([response.data], { type: 'application/pdf' });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = suggestedName || 'roadmap.pdf';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  // Revoke a moment later so the browser actually has time to use it.
+  setTimeout(() => window.URL.revokeObjectURL(url), 4000);
+};
+
 export const viewProfileResume = async () => {
   const response = await api.get('/profile/resume/file', { responseType: 'blob' });
   const blob = response.data;

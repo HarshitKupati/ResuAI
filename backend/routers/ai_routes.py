@@ -15,7 +15,8 @@ from ..services.ai_service import (
     generate_cover_letter,
     generate_interview_questions,
     analyze_resume_strength,
-    check_api_status
+    check_api_status,
+    generate_role_guide,
 )
 
 
@@ -57,6 +58,10 @@ class InterviewQuestionsRequest(BaseModel):
 
 class ResumeStrengthRequest(BaseModel):
     resume_data: Dict[str, Any] = Field(description="Parsed resume data")
+
+
+class RoleGuideRequest(BaseModel):
+    role: str = Field(min_length=2, max_length=80, description="Job role / title")
 
 
 # ============================================
@@ -235,6 +240,32 @@ async def get_resume_strength(request: ResumeStrengthRequest) -> Dict[str, Any]:
         raise HTTPException(
             status_code=500,
             detail="Strength analysis failed. Please try again later."
+        )
+
+
+@router.post("/role-guide")
+async def get_role_guide(request: RoleGuideRequest) -> Dict[str, Any]:
+    """
+    Generate a structured learning roadmap for a given job role.
+
+    Returns:
+    - Role summary
+    - Key skills and tools
+    - Typical hiring requirements
+    - Step-by-step learning path with resources
+    - Estimated time to become job-ready
+    - Career growth options
+    """
+    try:
+        result = generate_role_guide(request.role)
+        return {"success": True, "data": result}
+    except ValueError as ve:
+        raise HTTPException(status_code=400, detail=str(ve))
+    except Exception:
+        logger.exception("Role guide generation failed")
+        raise HTTPException(
+            status_code=500,
+            detail="Could not generate role guide. Please try again.",
         )
 
 

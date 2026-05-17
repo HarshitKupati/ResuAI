@@ -23,10 +23,28 @@ import {
   ShieldCheck,
   X,
   Code2,
+  Search,
+  BookOpen,
+  Wrench,
+  Clock,
+  TrendingUp,
+  ListChecks,
+  Compass,
+  Bookmark,
+  BookmarkCheck,
+  Download,
+  MessageCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Card, CardHeader, EmptyState, Spinner } from '../components/ui';
-import { getUserProfile, uploadProfileResume, deleteUserProfile } from '../services/api';
+import {
+  getUserProfile,
+  uploadProfileResume,
+  deleteUserProfile,
+  getRoleGuide,
+  saveRoadmap,
+  downloadRoadmapPdf,
+} from '../services/api';
 
 export default function Dashboard({ user, onNavigate }) {
   const [profile, setProfile] = useState(null);
@@ -143,10 +161,10 @@ function UploadHero({ user, uploading, onUpload }) {
           // Only open picker when the bare zone is clicked, not a child button/input.
           if (e.target === e.currentTarget) inputRef.current?.click();
         }}
-        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-16 text-center transition ${
+        className={`relative cursor-pointer rounded-2xl border-2 border-dashed p-8 sm:p-12 md:p-16 text-center transition ${
           drag
-            ? 'border-indigo-500 bg-indigo-50'
-            : 'border-slate-300 bg-white hover:border-indigo-400 hover:bg-indigo-50/40'
+            ? 'border-brand-500 bg-brand-50'
+            : 'border-slate-300 bg-white hover:border-brand-400 hover:bg-brand-50/40'
         }`}
       >
         <input
@@ -161,7 +179,7 @@ function UploadHero({ user, uploading, onUpload }) {
             if (f) onUpload(f);
           }}
         />
-        <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <div className="mx-auto h-16 w-16 rounded-2xl bg-gradient-to-br from-brand-500 to-accent-600 text-white flex items-center justify-center shadow-lg shadow-brand-500/30">
           {uploading ? <Loader2 className="h-7 w-7 animate-spin" /> : <Upload className="h-7 w-7" />}
         </div>
         <h2 className="mt-5 text-xl font-semibold text-slate-900">
@@ -177,7 +195,7 @@ function UploadHero({ user, uploading, onUpload }) {
               e.stopPropagation();
               inputRef.current?.click();
             }}
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 text-sm font-semibold shadow-md hover:from-indigo-700 hover:to-purple-700"
+            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand-600 to-accent-600 text-white px-6 py-2.5 text-sm font-semibold shadow-md hover:from-brand-700 hover:to-accent-700"
           >
             <Upload className="h-4 w-4" /> Choose File
           </button>
@@ -211,15 +229,15 @@ function ProfileDashboard({ profile, user, uploading, onUpload, onDelete, onNavi
       />
 
       {/* Header */}
-      <div className="rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 p-7 text-white shadow-xl relative overflow-hidden">
+      <div className="rounded-2xl bg-gradient-to-r from-brand-600 via-brand-700 to-accent-600 p-5 sm:p-7 text-white shadow-premium relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
         <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-5">
           <div>
-            <div className="flex items-center gap-2 text-indigo-100 text-sm">
+            <div className="flex items-center gap-2 text-brand-100 text-sm">
               <Sparkles className="h-4 w-4" /> AI-Powered Profile
             </div>
-            <h1 className="mt-1 text-3xl font-bold">{displayName}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-sm text-indigo-100">
+            <h1 className="mt-1 text-2xl sm:text-3xl font-bold break-words">{displayName}</h1>
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-1.5 text-sm text-brand-100">
               {(resume.email || user?.email) && (
                 <span className="inline-flex items-center gap-1.5">
                   <Mail className="h-3.5 w-3.5" /> {resume.email || user?.email}
@@ -246,7 +264,7 @@ function ProfileDashboard({ profile, user, uploading, onUpload, onDelete, onNavi
             <button
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="inline-flex items-center gap-2 rounded-lg bg-white text-indigo-700 px-4 py-2 text-sm font-semibold hover:bg-indigo-50 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg bg-white text-brand-700 px-4 py-2 text-sm font-semibold hover:bg-brand-50 disabled:opacity-60"
             >
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               {uploading ? 'Updating…' : 'Update Resume'}
@@ -262,7 +280,7 @@ function ProfileDashboard({ profile, user, uploading, onUpload, onDelete, onNavi
             </button>
             <button
               onClick={() => onNavigate && onNavigate('analyze')}
-              className="inline-flex items-center gap-2 rounded-lg bg-indigo-700/40 text-white ring-1 ring-white/30 px-4 py-2 text-sm font-semibold hover:bg-indigo-700/60"
+              className="inline-flex items-center gap-2 rounded-lg bg-brand-800/40 text-white ring-1 ring-white/30 px-4 py-2 text-sm font-semibold hover:bg-brand-800/60"
             >
               <FileText className="h-4 w-4" /> Run JD Analysis
             </button>
@@ -281,7 +299,7 @@ function ProfileDashboard({ profile, user, uploading, onUpload, onDelete, onNavi
           <CardHeader
             title="Career Progress"
             subtitle="AI-generated insights based on your projects and experiences"
-            right={<Sparkles className="h-4 w-4 text-indigo-500" />}
+            right={<Sparkles className="h-4 w-4 text-brand-500" />}
           />
           {roles.length === 0 ? (
             <EmptyState
@@ -318,7 +336,7 @@ function ProfileDashboard({ profile, user, uploading, onUpload, onDelete, onNavi
         />
         <ListCard
           title="Work Experience"
-          icon={<Briefcase className="h-4 w-4 text-purple-500" />}
+          icon={<Briefcase className="h-4 w-4 text-accent-500" />}
           items={resume.work_experience}
           emptyText="No work experience listed"
         />
@@ -624,8 +642,8 @@ function educationEntries(edu) {
 function ExperiencePie({ summary }) {
   const [hovered, setHovered] = useState(null);
   const segments = [
-    { key: 'certifications', label: 'certification', color: '#6366f1', value: summary.certifications || 0 },
-    { key: 'education', label: 'education', color: '#a855f7', value: summary.education || 0 },
+    { key: 'certifications', label: 'certification', color: '#4f46e5', value: summary.certifications || 0 },
+    { key: 'education', label: 'education', color: '#c026d3', value: summary.education || 0 },
     { key: 'projects', label: 'project', color: '#ec4899', value: summary.projects || 0 },
   ];
   const total = segments.reduce((s, seg) => s + seg.value, 0);
@@ -738,11 +756,445 @@ function ExperiencePie({ summary }) {
   );
 }
 
+/* ────────────────────────────────────────────────────────────────────────
+   RoleExplorer — search any role, get a structured learning roadmap.
+   ──────────────────────────────────────────────────────────────────────── */
+const QUICK_ROLES = [
+  'Data Scientist',
+  'Full Stack Developer',
+  'DevOps Engineer',
+  'Product Manager',
+  'UX Designer',
+];
+
+export function RoleExplorer({ onAskCoach } = {}) {
+  const [query, setQuery] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [guide, setGuide] = useState(null);
+  const [error, setError] = useState('');
+
+  const runSearch = async (role) => {
+    const value = (role ?? query).trim();
+    if (!value) {
+      toast.error('Type a role to explore');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      const data = await getRoleGuide(value);
+      setGuide(data);
+      setQuery(value);
+    } catch (e) {
+      const detail = e?.response?.data?.detail;
+      const msg = typeof detail === 'string' ? detail : 'Could not load role guide';
+      setError(msg);
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const onSubmit = (e) => {
+    e.preventDefault();
+    runSearch();
+  };
+
+  return (
+    <Card className="p-0 overflow-hidden">
+      {/* Header band */}
+      <div className="relative px-5 sm:px-7 py-6 bg-gradient-to-br from-brand-50 via-white to-accent-50 border-b border-slate-100">
+        <div className="absolute -top-10 -right-10 w-56 h-56 rounded-full bg-accent-200/40 blur-3xl pointer-events-none" />
+        <div className="relative flex items-start gap-3">
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-brand-600 to-accent-600 text-white shadow-glow flex-shrink-0">
+            <Compass className="h-5 w-5" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <h3 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+              Explore any role &mdash; get a learning roadmap
+            </h3>
+            <p className="mt-1 text-sm sm:text-base text-slate-600 leading-relaxed">
+              Type a role and find out exactly what to learn next, the tools you&apos;ll need,
+              and a step-by-step path from beginner to job-ready.
+            </p>
+          </div>
+        </div>
+
+        {/* Search bar */}
+        <form onSubmit={onSubmit} className="relative mt-5">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 pointer-events-none" />
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder='e.g. "Data Scientist", "Cloud Engineer", "Product Manager"'
+            className="w-full pl-10 pr-32 py-3 rounded-lg bg-white border border-slate-200 text-sm focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none placeholder:text-slate-400 shadow-sm"
+            disabled={loading}
+          />
+          <button
+            type="submit"
+            disabled={loading || !query.trim()}
+            className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 rounded-md bg-gradient-to-r from-brand-600 to-accent-600 text-white px-3.5 py-2 text-xs sm:text-sm font-semibold hover:from-brand-700 hover:to-accent-700 disabled:opacity-50 transition shadow-sm"
+          >
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+            <span className="hidden sm:inline">{loading ? 'Building…' : 'Get roadmap'}</span>
+          </button>
+        </form>
+
+        {/* Quick chips */}
+        <div className="mt-3 flex flex-wrap gap-2">
+          <span className="text-xs font-medium text-slate-500 self-center">Try:</span>
+          {QUICK_ROLES.map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => runSearch(r)}
+              disabled={loading}
+              className="text-xs px-2.5 py-1 rounded-full bg-white/80 ring-1 ring-slate-200 text-slate-700 hover:bg-brand-50 hover:ring-brand-300 hover:text-brand-700 disabled:opacity-50 transition"
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="px-5 sm:px-7 py-6">
+        {loading && !guide && <RoleGuideSkeleton />}
+
+        {!loading && !guide && !error && (
+          <div className="text-center py-6 text-slate-500 text-sm">
+            <BookOpen className="h-6 w-6 mx-auto text-slate-300" />
+            <p className="mt-2">Search for a role above to see a complete learning roadmap.</p>
+          </div>
+        )}
+
+        {error && !loading && !guide && (
+          <div className="text-center py-6 text-sm text-red-600 bg-red-50 ring-1 ring-red-200 rounded-lg px-4">
+            {error}
+          </div>
+        )}
+
+        {guide && (
+          <RoleGuideResult
+            guide={guide}
+            loading={loading}
+            onAskCoach={onAskCoach}
+          />
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function RoleGuideSkeleton() {
+  return (
+    <div className="animate-pulse space-y-4">
+      <div className="h-4 w-1/3 bg-slate-200 rounded" />
+      <div className="h-3 w-full bg-slate-100 rounded" />
+      <div className="h-3 w-5/6 bg-slate-100 rounded" />
+      <div className="grid sm:grid-cols-2 gap-4 mt-4">
+        <div className="h-24 bg-slate-100 rounded-lg" />
+        <div className="h-24 bg-slate-100 rounded-lg" />
+      </div>
+      <div className="h-32 bg-slate-100 rounded-lg" />
+    </div>
+  );
+}
+
+function RoleGuideResult({ guide, loading, onAskCoach }) {
+  const {
+    role,
+    summary,
+    key_skills = [],
+    tools = [],
+    requirements = [],
+    learning_path = [],
+    estimated_time,
+    career_growth = [],
+    source,
+  } = guide;
+
+  const [savedId, setSavedId] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+
+  // Reset "Saved" state whenever a new role is loaded.
+  useEffect(() => {
+    setSavedId(null);
+  }, [role]);
+
+  const handleSave = async () => {
+    if (saving || savedId) return;
+    setSaving(true);
+    try {
+      const saved = await saveRoadmap(guide);
+      if (saved?.id) {
+        setSavedId(saved.id);
+        toast.success('Roadmap saved');
+      }
+    } catch (e) {
+      const detail = e?.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : 'Could not save roadmap');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (downloading) return;
+    let id = savedId;
+    setDownloading(true);
+    try {
+      // We need a persisted roadmap to render the server-side PDF.
+      // If the user hasn't saved yet, save silently first.
+      if (!id) {
+        const saved = await saveRoadmap(guide);
+        if (saved?.id) {
+          id = saved.id;
+          setSavedId(saved.id);
+        }
+      }
+      if (!id) throw new Error('Could not prepare roadmap for download');
+      const safe = (role || 'roadmap').replace(/[^a-z0-9]+/gi, '_').toLowerCase();
+      await downloadRoadmapPdf(id, `${safe}_roadmap.pdf`);
+    } catch (e) {
+      toast.error('Could not download PDF');
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleSkillClick = (skill) => {
+    if (!onAskCoach) return;
+    const prompt =
+      `I'm working toward becoming a ${role}. I want to deeply learn ` +
+      `**${skill}** next \u2014 give me the fastest credible path: ` +
+      `a 1-paragraph goal, concrete resources, a realistic time estimate, ` +
+      `and one practice project that proves I have it.`;
+    onAskCoach(prompt);
+  };
+
+  return (
+    <div className={`space-y-6 ${loading ? 'opacity-60 pointer-events-none' : ''}`}>
+      {/* Title + summary + actions */}
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <h4 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">{role}</h4>
+          {estimated_time && (
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 ring-1 ring-brand-200 text-xs font-medium">
+              <Clock className="h-3 w-3" /> {estimated_time}
+            </span>
+          )}
+          {source === 'fallback' && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-[10px] font-medium uppercase tracking-wide">
+              Generic guide
+            </span>
+          )}
+        </div>
+        {summary && (
+          <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">{summary}</p>
+        )}
+
+        {/* Action row */}
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving || !!savedId}
+            className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold ring-1 transition disabled:opacity-70 ${
+              savedId
+                ? 'bg-emerald-50 text-emerald-700 ring-emerald-200'
+                : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300'
+            }`}
+          >
+            {saving ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : savedId ? (
+              <BookmarkCheck className="h-3.5 w-3.5" />
+            ) : (
+              <Bookmark className="h-3.5 w-3.5" />
+            )}
+            {savedId ? 'Saved' : saving ? 'Saving…' : 'Save roadmap'}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleDownload}
+            disabled={downloading}
+            className="inline-flex items-center gap-1.5 rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50 hover:ring-slate-300 transition disabled:opacity-70"
+          >
+            {downloading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Download className="h-3.5 w-3.5" />
+            )}
+            {downloading ? 'Building…' : 'Download PDF'}
+          </button>
+
+          {onAskCoach && (
+            <span className="ml-1 text-[11px] text-slate-400">
+              Tip: click any skill below to ask the Coach.
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Key skills + Tools */}
+      <div className="grid md:grid-cols-2 gap-4">
+        <RoleChipPanel
+          title="Key skills"
+          icon={<Sparkles className="h-4 w-4 text-brand-500" />}
+          items={key_skills}
+          chipClass="bg-brand-50 text-brand-700 ring-1 ring-brand-200"
+          emptyText="No skills listed"
+          onItemClick={onAskCoach ? handleSkillClick : undefined}
+          clickHint="Ask the AI Coach for a learning plan for this skill"
+        />
+        <RoleChipPanel
+          title="Tools & tech"
+          icon={<Wrench className="h-4 w-4 text-accent-500" />}
+          items={tools}
+          chipClass="bg-accent-50 text-accent-700 ring-1 ring-accent-200"
+          emptyText="No tools listed"
+        />
+      </div>
+
+      {/* Requirements */}
+      {requirements.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <ListChecks className="h-4 w-4 text-emerald-600" />
+            <h5 className="text-sm font-semibold text-slate-900">Typical requirements</h5>
+          </div>
+          <ul className="space-y-2">
+            {requirements.map((req, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
+                <CheckCircle2 className="h-4 w-4 text-emerald-500 flex-shrink-0 mt-0.5" />
+                <span>{req}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Learning path */}
+      {learning_path.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 mb-3">
+            <BookOpen className="h-4 w-4 text-brand-600" />
+            <h5 className="text-sm font-semibold text-slate-900">Step-by-step learning path</h5>
+          </div>
+          <ol className="relative space-y-3 pl-6 sm:pl-8 before:absolute before:left-2 sm:before:left-3 before:top-1 before:bottom-1 before:w-px before:bg-gradient-to-b before:from-brand-300 before:via-accent-300 before:to-transparent">
+            {learning_path.map((s, idx) => (
+              <li key={idx} className="relative">
+                <span className="absolute -left-6 sm:-left-8 top-0 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-brand-600 to-accent-600 text-white text-[11px] font-bold shadow-glow">
+                  {s.step || idx + 1}
+                </span>
+                <div className="rounded-lg ring-1 ring-slate-200 bg-white p-3 sm:p-4 shadow-sm hover:shadow transition">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h6 className="text-sm sm:text-base font-semibold text-slate-900">{s.title}</h6>
+                    {s.duration && (
+                      <span className="inline-flex items-center gap-1 text-xs text-slate-500">
+                        <Clock className="h-3 w-3" /> {s.duration}
+                      </span>
+                    )}
+                  </div>
+                  {s.description && (
+                    <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">{s.description}</p>
+                  )}
+                  {Array.isArray(s.resources) && s.resources.length > 0 && (
+                    <div className="mt-2.5 flex flex-wrap gap-1.5">
+                      {s.resources.map((r, j) => (
+                        <span
+                          key={j}
+                          className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-50 text-slate-700 ring-1 ring-slate-200 text-xs"
+                        >
+                          <BookOpen className="h-3 w-3 text-slate-400" />
+                          {r}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Career growth */}
+      {career_growth.length > 0 && (
+        <div className="rounded-lg p-4 bg-gradient-to-r from-emerald-50 via-white to-brand-50 ring-1 ring-emerald-200/60">
+          <div className="flex items-center gap-2">
+            <TrendingUp className="h-4 w-4 text-emerald-600" />
+            <h5 className="text-sm font-semibold text-slate-900">Where this leads next</h5>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {career_growth.map((c, i) => (
+              <span
+                key={i}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white text-slate-700 ring-1 ring-slate-200 text-xs font-medium"
+              >
+                <ArrowRight className="h-3 w-3 text-emerald-500" />
+                {c}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function RoleChipPanel({ title, icon, items, chipClass, emptyText, onItemClick, clickHint }) {
+  const clickable = typeof onItemClick === 'function';
+  return (
+    <div className="rounded-lg ring-1 ring-slate-200 bg-white p-4">
+      <div className="flex items-center gap-2 mb-2.5">
+        {icon}
+        <h5 className="text-sm font-semibold text-slate-900">{title}</h5>
+        {clickable && (
+          <span className="ml-auto inline-flex items-center gap-1 text-[10px] uppercase tracking-wide font-semibold text-brand-600">
+            <MessageCircle className="h-3 w-3" /> Clickable
+          </span>
+        )}
+      </div>
+      {items.length === 0 ? (
+        <p className="text-xs text-slate-400">{emptyText}</p>
+      ) : (
+        <div className="flex flex-wrap gap-1.5">
+          {items.map((it, i) =>
+            clickable ? (
+              <button
+                key={i}
+                type="button"
+                onClick={() => onItemClick(it)}
+                title={clickHint || 'Ask the coach about this'}
+                className={`group inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium ring-1 ring-transparent transition hover:ring-brand-400 hover:bg-brand-100 hover:text-brand-800 focus:outline-none focus:ring-brand-500 ${chipClass}`}
+              >
+                {it}
+                <ArrowRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition" />
+              </button>
+            ) : (
+              <span
+                key={i}
+                className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${chipClass}`}
+              >
+                {it}
+              </span>
+            ),
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function RoleBar({ role }) {
   const pct = Math.max(0, Math.min(100, Math.round(role.score || role.confidence || 0)));
   const tone =
     pct >= 70 ? 'from-emerald-500 to-emerald-600'
-      : pct >= 50 ? 'from-indigo-500 to-purple-600'
+      : pct >= 50 ? 'from-brand-500 to-accent-600'
       : 'from-amber-500 to-orange-500';
   return (
     <div>
@@ -772,8 +1224,8 @@ function SkillsBlocks({ grouped }) {
   }
 
   const chipTone = {
-    indigo: 'bg-indigo-50 text-indigo-700 ring-indigo-200',
-    purple: 'bg-purple-50 text-purple-700 ring-purple-200',
+    indigo: 'bg-brand-50 text-brand-700 ring-brand-200',
+    purple: 'bg-accent-50 text-accent-700 ring-accent-200',
     pink: 'bg-pink-50 text-pink-700 ring-pink-200',
   };
 
@@ -828,7 +1280,7 @@ function ProjectsCard({ projects }) {
       <Card className="p-6">
         <CardHeader
           title="Projects"
-          icon={<Folder className="h-4 w-4 text-indigo-500" />}
+          icon={<Folder className="h-4 w-4 text-brand-500" />}
           subtitle={`${list.length} project${list.length === 1 ? '' : 's'} extracted`}
         />
         {list.length === 0 ? (
@@ -839,12 +1291,12 @@ function ProjectsCard({ projects }) {
               const hasDetails = !!(proj.description || (proj.technologies && proj.technologies.length));
               return (
                 <li key={i} className="flex items-start gap-2 text-sm">
-                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
+                  <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-brand-400 flex-shrink-0" />
                   {hasDetails ? (
                     <button
                       type="button"
                       onClick={() => setActive(proj)}
-                      className="text-left text-slate-700 hover:text-indigo-600 hover:underline transition-colors"
+                      className="text-left text-slate-700 hover:text-brand-600 hover:underline transition-colors"
                     >
                       {proj.name}
                     </button>
@@ -881,7 +1333,7 @@ function ProjectsCard({ projects }) {
 
             <div className="px-7 pt-7 pb-4 border-b border-slate-100">
               <div className="flex items-start gap-3 pr-10">
-                <div className="mt-1 h-9 w-9 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                <div className="mt-1 h-9 w-9 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center flex-shrink-0">
                   <Folder className="h-5 w-5" />
                 </div>
                 <div className="min-w-0">
@@ -918,7 +1370,7 @@ function ProjectsCard({ projects }) {
                     {active.technologies.map((tech, i) => (
                       <span
                         key={i}
-                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100"
+                        className="px-3 py-1.5 rounded-full text-xs font-medium bg-brand-50 text-brand-700 border border-brand-100"
                       >
                         {tech}
                       </span>
@@ -949,7 +1401,7 @@ function ListCard({ title, icon, items, emptyText }) {
         <ul className="mt-2 space-y-2">
           {list.slice(0, 8).map((item, i) => (
             <li key={i} className="flex items-start gap-2 text-sm text-slate-700">
-              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-indigo-400 flex-shrink-0" />
+              <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-brand-400 flex-shrink-0" />
               <span>{typeof item === 'string' ? item : JSON.stringify(item)}</span>
             </li>
           ))}

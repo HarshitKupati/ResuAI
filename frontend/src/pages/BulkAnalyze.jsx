@@ -343,7 +343,7 @@ function RankedResults({ result, expanded, setExpanded, onReset }) {
       </div>
 
       {isMultiJd && (
-        <Card className="p-4 bg-gradient-to-r from-brand-50 to-indigo-50 ring-1 ring-brand-200/60">
+        <Card className="p-4 bg-gradient-to-r from-brand-50 to-accent-50 ring-1 ring-brand-200/60">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-600 text-white flex-shrink-0">
               <Briefcase className="h-5 w-5" />
@@ -410,7 +410,7 @@ function RankedResults({ result, expanded, setExpanded, onReset }) {
       {/* Ranked table */}
       <Card className="p-0 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
+          <table className="table-responsive min-w-full text-sm">
             <thead className="bg-slate-50">
               <tr className="text-left text-xs uppercase tracking-wide text-slate-500">
                 <th className="px-4 py-3 w-14">Rank</th>
@@ -433,41 +433,43 @@ function RankedResults({ result, expanded, setExpanded, onReset }) {
                       className="hover:bg-slate-50/60 cursor-pointer"
                       onClick={() => setExpanded(isOpen ? null : c.candidate_id)}
                     >
-                      <td className="px-4 py-3">
+                      <td data-label="Rank" className="px-4 py-3">
                         <div className="flex items-center justify-center h-7 w-7">{rankIcon(c.rank)}</div>
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-slate-900">{c.candidate_name}</div>
-                        <div className="text-xs text-slate-500 flex items-center gap-1.5">
-                          <FileText className="h-3 w-3" />
-                          <span className="truncate max-w-[200px]">{c.file_name}</span>
-                          {c.email && (
-                            <>
-                              <span>·</span>
-                              <Mail className="h-3 w-3" />
-                              <span className="truncate max-w-[160px]">{c.email}</span>
-                            </>
-                          )}
+                      <td data-label="Candidate" className="px-4 py-3">
+                        <div className="text-right md:text-left min-w-0">
+                          <div className="font-medium text-slate-900 truncate">{c.candidate_name}</div>
+                          <div className="text-xs text-slate-500 flex items-center gap-1.5 justify-end md:justify-start">
+                            <FileText className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate max-w-[200px]">{c.file_name}</span>
+                            {c.email && (
+                              <>
+                                <span>·</span>
+                                <Mail className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate max-w-[160px]">{c.email}</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </td>
                       {isMultiJd && (
-                        <td className="px-4 py-3">
+                        <td data-label="Best JD" className="px-4 py-3">
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 text-brand-700 ring-1 ring-brand-200 text-xs font-medium">
                             <Briefcase className="h-3 w-3" />
                             <span className="truncate max-w-[140px]">{c.best_jd_label}</span>
                           </span>
                         </td>
                       )}
-                      <td className="px-4 py-3">
+                      <td data-label="ATS" className="px-4 py-3">
                         <ScoreCell value={c.ats_score} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="JD Match" className="px-4 py-3">
                         <ScoreCell value={c.match_score} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="Role Fit" className="px-4 py-3">
                         <ScoreCell value={c.role_fit_score} />
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="Composite" className="px-4 py-3">
                         <span
                           className={`inline-flex items-center px-2.5 py-1 rounded-md ring-1 font-bold tabular-nums ${scoreTone(
                             c.composite_score,
@@ -476,7 +478,7 @@ function RankedResults({ result, expanded, setExpanded, onReset }) {
                           {Math.round(c.composite_score)}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td data-label="Verdict" className="px-4 py-3">
                         <span
                           className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ring-1 ${
                             VERDICT_BADGE[c.verdict?.status] || VERDICT_BADGE.needs_work
@@ -485,13 +487,16 @@ function RankedResults({ result, expanded, setExpanded, onReset }) {
                           {VERDICT_LABEL[c.verdict?.status] || 'N/A'}
                         </span>
                       </td>
-                      <td className="px-4 py-3 text-slate-400">
-                        {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                      <td data-label="" className="px-4 py-3 text-slate-400">
+                        <span className="inline-flex items-center gap-1 text-xs text-slate-500 md:text-slate-400">
+                          <span className="md:hidden">{isOpen ? 'Hide details' : 'View details'}</span>
+                          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </span>
                       </td>
                     </tr>
                     {isOpen && (
                       <tr className="bg-slate-50/40">
-                        <td colSpan={isMultiJd ? 9 : 8} className="px-4 py-4">
+                        <td data-label="" colSpan={isMultiJd ? 9 : 8} className="px-4 py-4">
                           <CandidateDetails c={c} />
                         </td>
                       </tr>

@@ -136,7 +136,7 @@ function EmailStep({ email, setEmail, submitting, setSubmitting, onNext }) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center flex-shrink-0">
           <KeyRound className="h-5 w-5" />
         </div>
         <div className="pr-8">
@@ -168,7 +168,7 @@ function EmailStep({ email, setEmail, submitting, setSubmitting, onNext }) {
       <button
         type="submit"
         disabled={submitting}
-        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 text-white py-2.5 text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50"
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 text-white py-2.5 text-sm font-semibold hover:bg-brand-700 disabled:opacity-50"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {submitting ? 'Sending code…' : 'Send verification code'}
@@ -307,7 +307,7 @@ function OtpStep({ email, submitting, setSubmitting, onBack, onNext }) {
       </button>
 
       <div className="mt-3 flex items-start gap-3">
-        <div className="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center flex-shrink-0">
           <KeyRound className="h-5 w-5" />
         </div>
         <div className="pr-8">
@@ -344,7 +344,7 @@ function OtpStep({ email, submitting, setSubmitting, onBack, onNext }) {
             type="button"
             onClick={handleResend}
             disabled={resending || submitting}
-            className="text-indigo-600 hover:text-indigo-700 font-medium disabled:opacity-50"
+            className="text-brand-600 hover:text-brand-700 font-medium disabled:opacity-50"
           >
             {resending ? 'Sending…' : 'Resend code'}
           </button>
@@ -354,7 +354,7 @@ function OtpStep({ email, submitting, setSubmitting, onBack, onNext }) {
       <button
         type="submit"
         disabled={submitting || otpValue.length !== OTP_LENGTH}
-        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 text-white py-2.5 text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50"
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 text-white py-2.5 text-sm font-semibold hover:bg-brand-700 disabled:opacity-50"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {submitting ? 'Verifying…' : 'Verify code'}
@@ -402,7 +402,7 @@ function PasswordStep({ resetToken, submitting, setSubmitting, onDone }) {
   return (
     <form onSubmit={handleSubmit}>
       <div className="flex items-start gap-3">
-        <div className="h-10 w-10 rounded-lg bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+        <div className="h-10 w-10 rounded-lg bg-brand-100 text-brand-600 flex items-center justify-center flex-shrink-0">
           <Lock className="h-5 w-5" />
         </div>
         <div className="pr-8">
@@ -445,7 +445,7 @@ function PasswordStep({ resetToken, submitting, setSubmitting, onDone }) {
       <button
         type="submit"
         disabled={submitting || !allGood}
-        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 text-white py-2.5 text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50"
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 text-white py-2.5 text-sm font-semibold hover:bg-brand-700 disabled:opacity-50"
       >
         {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
         {submitting ? 'Resetting…' : 'Reset password'}
@@ -511,7 +511,7 @@ function DoneStep({ email, onContinue }) {
       <button
         type="button"
         onClick={onContinue}
-        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-indigo-600 text-white py-2.5 text-sm font-semibold hover:bg-indigo-700"
+        className="mt-5 w-full inline-flex items-center justify-center gap-2 rounded-lg bg-brand-600 text-white py-2.5 text-sm font-semibold hover:bg-brand-700"
       >
         Continue to Sign In
       </button>

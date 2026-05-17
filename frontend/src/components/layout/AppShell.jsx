@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import {
   Home, LayoutDashboard, FileSearch, History, LogOut, Sparkles, FileText, Users,
   Pencil, X, Camera, Trash2, Loader2, Lock, Eye, EyeOff, CheckCircle2, ChevronDown, ChevronUp,
-  Menu, ArrowUp,
+  Menu, ArrowUp, Compass,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { viewProfileResume, updateUserProfile, changePasswordRequest } from '../../services/api';
@@ -12,6 +12,7 @@ import ForgotPasswordModal from '../auth/ForgotPasswordModal';
 const NAV = [
   { id: 'home', label: 'Home', icon: Home },
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'explorer', label: 'Explorer', icon: Compass },
   { id: 'analyze', label: 'New Analysis', icon: FileSearch },
   { id: 'bulk', label: 'Compare Resumes', icon: Users },
   { id: 'history', label: 'History', icon: History },
@@ -239,7 +240,10 @@ export default function AppShell({ children, user, activeTab, onTabChange, onLog
                 <span>Powered by Advanced NLP & Machine Learning</span>
                 <span className="hidden md:inline">·</span>
                 <a
-                  href="http://localhost:8000/docs"
+                  href={
+                    (process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000/api').replace(/\/api\/?$/, '') +
+                    '/docs'
+                  }
                   target="_blank"
                   rel="noreferrer"
                   className="text-brand-600 hover:text-brand-700 font-medium"

@@ -96,7 +96,7 @@ export default function AuthPage({ onAuthSuccess }) {
   return (
     <div className="min-h-screen bg-white">
       {/* ===== Top header ===== */}
-      <header className="absolute top-0 left-0 right-0 z-20 px-6 md:px-12 py-5 flex items-center justify-between">
+      <header className="absolute top-0 left-0 right-0 z-20 px-4 sm:px-6 md:px-12 py-4 sm:py-5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-brand-600 to-accent-600 text-white shadow-glow">
             <Sparkles className="h-5 w-5" />
@@ -139,14 +139,14 @@ export default function AuthPage({ onAuthSuccess }) {
           }}
         />
         {/* Color glows */}
-        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-indigo-300/40 blur-3xl pointer-events-none" />
-        <div className="absolute top-32 right-0 w-[26rem] h-[26rem] rounded-full bg-purple-300/30 blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 left-1/3 w-[24rem] h-[24rem] rounded-full bg-cyan-200/40 blur-3xl pointer-events-none" />
+        <div className="absolute -top-24 -left-24 w-[28rem] h-[28rem] rounded-full bg-brand-300/40 blur-3xl pointer-events-none" />
+        <div className="absolute top-32 right-0 w-[26rem] h-[26rem] rounded-full bg-accent-300/30 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-24 left-1/3 w-[24rem] h-[24rem] rounded-full bg-sky-200/40 blur-3xl pointer-events-none" />
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 pt-24 sm:pt-28 pb-16 sm:pb-24 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Left: copy */}
           <div className="text-slate-900">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur ring-1 ring-indigo-200 px-3.5 py-1.5 text-xs font-semibold text-indigo-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur ring-1 ring-brand-200 px-3.5 py-1.5 text-xs font-semibold text-brand-700 shadow-sm">
               <Sparkles className="h-3.5 w-3.5" /> Powered by GPT-4 &amp; ML
             </span>
             <h2 className="mt-5 text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
@@ -166,7 +166,7 @@ export default function AuthPage({ onAuthSuccess }) {
                 'Industry-specific insights',
               ].map((item) => (
                 <li key={item} className="flex items-center gap-3 text-slate-800">
-                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-indigo-600 text-white">
+                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-brand-600 text-white">
                     <CheckCircle2 className="h-4 w-4" strokeWidth={3} />
                   </span>
                   <span className="text-base font-medium">{item}</span>
@@ -272,13 +272,13 @@ export default function AuthPage({ onAuthSuccess }) {
                   <label className="flex items-center gap-2 text-slate-600">
                     <input
                       type="checkbox"
-                      className="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-slate-300 text-brand-600 focus:ring-brand-500"
                     />
                     Remember me
                   </label>
                   <button
                     type="button"
-                    className="text-indigo-600 font-medium hover:text-indigo-700"
+                    className="text-brand-600 font-medium hover:text-brand-700"
                     onClick={() => setForgotOpen(true)}
                   >
                     Forgot password?
@@ -304,7 +304,7 @@ export default function AuthPage({ onAuthSuccess }) {
                   <button
                     type="button"
                     onClick={() => switchMode('signup')}
-                    className="text-indigo-600 font-semibold hover:text-indigo-700"
+                    className="text-brand-600 font-semibold hover:text-brand-700"
                   >
                     Sign Up
                   </button>
@@ -315,7 +315,7 @@ export default function AuthPage({ onAuthSuccess }) {
                   <button
                     type="button"
                     onClick={() => switchMode('signin')}
-                    className="text-indigo-600 font-semibold hover:text-indigo-700"
+                    className="text-brand-600 font-semibold hover:text-brand-700"
                   >
                     Sign In
                   </button>
@@ -345,17 +345,17 @@ export default function AuthPage({ onAuthSuccess }) {
           }}
         />
         {/* Soft pastel glows */}
-        <div className="absolute top-10 -left-20 w-[24rem] h-[24rem] rounded-full bg-cyan-200/40 blur-3xl pointer-events-none" />
-        <div className="absolute top-1/2 right-0 w-[26rem] h-[26rem] rounded-full bg-pink-200/40 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-1/3 w-[22rem] h-[22rem] rounded-full bg-purple-200/40 blur-3xl pointer-events-none" />
+        <div className="absolute top-10 -left-20 w-[24rem] h-[24rem] rounded-full bg-sky-200/40 blur-3xl pointer-events-none" />
+        <div className="absolute top-1/2 right-0 w-[26rem] h-[26rem] rounded-full bg-accent-200/40 blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-1/3 w-[22rem] h-[22rem] rounded-full bg-brand-200/40 blur-3xl pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur ring-1 ring-purple-200 px-3.5 py-1.5 text-xs font-semibold text-purple-700 shadow-sm">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur ring-1 ring-accent-200 px-3.5 py-1.5 text-xs font-semibold text-accent-700 shadow-sm">
               <Sparkles className="h-3.5 w-3.5" /> WHY CHOOSE US
             </span>
             <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">Unlock Your Potential</h2>
-            <div className="mt-4 mx-auto h-px w-24 bg-gradient-to-r from-transparent via-purple-300 to-transparent" />
+            <div className="mt-4 mx-auto h-px w-24 bg-gradient-to-r from-transparent via-accent-300 to-transparent" />
             <p className="mt-5 text-lg text-slate-600">
               Join the community that&apos;s redefining career success
             </p>
@@ -414,7 +414,7 @@ export default function AuthPage({ onAuthSuccess }) {
         />
         <div className="max-w-6xl mx-auto relative">
           <div className="text-center max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-2 rounded-full bg-indigo-100 text-indigo-700 px-3.5 py-1.5 text-xs font-semibold">
+            <span className="inline-flex items-center gap-2 rounded-full bg-brand-100 text-brand-700 px-3.5 py-1.5 text-xs font-semibold">
               <BarChart3 className="h-3.5 w-3.5" /> ATS SCORING SYSTEM
             </span>
             <h2 className="mt-4 text-4xl md:text-5xl font-bold text-slate-900">
@@ -430,13 +430,13 @@ export default function AuthPage({ onAuthSuccess }) {
               weight="45%"
               title="Keyword Match"
               description="How many JD keywords appear in your resume."
-              accent="from-indigo-500 to-indigo-600"
+              accent="from-brand-500 to-brand-600"
             />
             <ScoreBreakdownCard
               weight="25%"
               title="Skill Match"
               description="Technical skills alignment with required skills."
-              accent="from-purple-500 to-purple-600"
+              accent="from-accent-500 to-accent-600"
             />
             <ScoreBreakdownCard
               weight="15%"
@@ -460,7 +460,7 @@ export default function AuthPage({ onAuthSuccess }) {
 
           <div className="mt-12 max-w-3xl mx-auto bg-white rounded-2xl p-6 ring-1 ring-slate-200/80 shadow-lg">
             <div className="flex items-start gap-4">
-              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-md shadow-indigo-500/30">
+              <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-accent-600 text-white shadow-md shadow-brand-500/30">
                 <Download className="h-5 w-5" />
               </span>
               <div>
@@ -492,7 +492,7 @@ export default function AuthPage({ onAuthSuccess }) {
             backgroundSize: '20px 20px',
           }}
         />
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[36rem] h-[36rem] rounded-full bg-purple-300/30 blur-3xl pointer-events-none" />
+        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[36rem] h-[36rem] rounded-full bg-accent-300/30 blur-3xl pointer-events-none" />
         <div className="max-w-4xl mx-auto relative">
           <div className="text-center">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-900">Your Path to Success</h2>
@@ -521,7 +521,7 @@ export default function AuthPage({ onAuthSuccess }) {
           <div className="mt-12 text-center">
             <button
               onClick={scrollToAuth}
-              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-8 py-3.5 text-base font-semibold hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-500/30 transition"
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-brand-600 to-accent-600 text-white px-8 py-3.5 text-base font-semibold hover:from-brand-700 hover:to-accent-700 shadow-lg shadow-brand-500/30 transition"
             >
               Sign Up Now <ArrowRight className="h-4 w-4" />
             </button>
@@ -543,9 +543,9 @@ export default function AuthPage({ onAuthSuccess }) {
 
       {/* ===== Footer ===== */}
       <footer className="bg-slate-900 text-slate-300 py-8">
-        <div className="max-w-6xl mx-auto px-6 md:px-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-center md:text-left">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 md:px-12 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-center md:text-left">
           <div className="flex items-center justify-center md:justify-start gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-purple-600 text-white">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-accent-600 text-white">
               <Sparkles className="h-4 w-4" />
             </span>
             <span className="text-white font-semibold">ResuMatch AI</span>
@@ -682,11 +682,11 @@ function ScoreBadge({ label, range, tone }) {
 function StepCard({ number, title, description }) {
   return (
     <div className="bg-white rounded-2xl p-6 ring-1 ring-slate-200/80 shadow-lg hover:shadow-xl transition flex gap-5 items-start">
-      <span className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white text-lg font-bold shadow-md shadow-indigo-500/30">
+      <span className="flex-shrink-0 flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-brand-500 to-accent-600 text-white text-lg font-bold shadow-md shadow-brand-500/30">
         {number}
       </span>
       <div>
-        <h3 className="text-lg font-semibold text-indigo-700">{title}</h3>
+        <h3 className="text-lg font-semibold text-brand-700">{title}</h3>
         <p className="mt-1.5 text-base text-slate-600 leading-relaxed">{description}</p>
       </div>
     </div>
