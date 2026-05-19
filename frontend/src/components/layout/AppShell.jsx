@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { viewProfileResume, updateUserProfile, changePasswordRequest } from '../../services/api';
-import ForgotPasswordModal from '../auth/ForgotPasswordModal';
 
 const NAV = [
   { id: 'home', label: 'Home', icon: Home },
@@ -565,14 +564,23 @@ function resizeImageToDataUrl(file, size = 256, quality = 0.85) {
  * Self-contained — does NOT submit the outer profile form.
  */
 function ChangePasswordSection({ userEmail, disabled }) {
+  const OTP_LENGTH = 6;
   const [open, setOpen] = useState(false);
+  // "normal" = change with current pwd, "sendingOtp" | "otp" | "resetPwd" | "done" = forgot flow
+  const [mode, setMode] = useState('normal');
   const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
   const [confirmPwd, setConfirmPwd] = useState('');
   const [showCurrent, setShowCurrent] = useState(false);
   const [showNew, setShowNew] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [forgotOpen, setForgotOpen] = useState(false);
+
+  // OTP forgot-password inline state
+  const [digits, setDigits] = useState(Array(OTP_LENGTH).fill(''));
+  const [cooldown, setCooldown] = useState(0);
+  const [resending, setResending] = useState(false);
+  const [resetToken, setResetToken] = useState(null);
+  const inputsRef = useRef([]);
 
   const checks = {
     length: newPwd.length >= 8,
@@ -581,16 +589,35 @@ function ChangePasswordSection({ userEmail, disabled }) {
     digit: /\d/.test(newPwd),
     special: /[^A-Za-z0-9]/.test(newPwd),
     match: newPwd.length > 0 && newPwd === confirmPwd,
-    different: newPwd.length > 0 && newPwd !== currentPwd,
+    different: mode === 'normal'
+      ? newPwd.length > 0 && newPwd !== currentPwd
+      : true,
   };
-  const allGood = Object.values(checks).every(Boolean) && currentPwd.length > 0;
+  const allGoodNormal = Object.values(checks).every(Boolean) && currentPwd.length > 0;
+  const allGoodReset = checks.length && checks.upper && checks.lower && checks.digit && checks.special && checks.match;
 
-  const reset = () => {
+  // Cooldown timer for OTP resend
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setInterval(() => setCooldown((c) => Math.max(0, c - 1)), 1000);
+    return () => clearInterval(t);
+  }, [cooldown]);
+
+  // Autofocus first OTP input
+  useEffect(() => {
+    if (mode === 'otp') inputsRef.current[0]?.focus();
+  }, [mode]);
+
+  const resetAll = () => {
     setCurrentPwd('');
     setNewPwd('');
     setConfirmPwd('');
     setShowCurrent(false);
     setShowNew(false);
+    setMode('normal');
+    setDigits(Array(OTP_LENGTH).fill(''));
+    setResetToken(null);
+    setCooldown(0);
   };
 
   const handleChange = async () => {
@@ -598,7 +625,7 @@ function ChangePasswordSection({ userEmail, disabled }) {
       toast.error('Please enter your current password');
       return;
     }
-    if (!allGood) {
+    if (!allGoodNormal) {
       toast.error('Please satisfy all password requirements');
       return;
     }
@@ -606,7 +633,7 @@ function ChangePasswordSection({ userEmail, disabled }) {
     try {
       await changePasswordRequest(currentPwd, newPwd);
       toast.success('Password changed successfully');
-      reset();
+      resetAll();
       setOpen(false);
     } catch (err) {
       const msg = err?.response?.data?.detail || 'Could not change password';
@@ -616,101 +643,347 @@ function ChangePasswordSection({ userEmail, disabled }) {
     }
   };
 
+  // ── Forgot password inline flow ──
+  const handleForgotClick = async () => {
+    setMode('sendingOtp');
+    setSubmitting(true);
+    try {
+      const { forgotPasswordRequest } = await import('../../services/api');
+      const data = await forgotPasswordRequest(userEmail);
+      if (data.email_registered === false) {
+        toast.error('No account found with that email');
+        setMode('normal');
+        return;
+      }
+      if (!data.delivered) {
+        toast('Email server not configured — check the backend logs for the OTP.', { icon: 'ℹ️', duration: 5000 });
+      } else {
+        toast.success('Verification code sent to your email');
+      }
+      setCooldown(data.resend_cooldown_seconds || 60);
+      setDigits(Array(OTP_LENGTH).fill(''));
+      setMode('otp');
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Could not send verification code';
+      toast.error(typeof msg === 'string' ? msg : 'Could not send verification code');
+      setMode('normal');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (cooldown > 0 || resending) return;
+    setResending(true);
+    try {
+      const { forgotPasswordRequest } = await import('../../services/api');
+      const data = await forgotPasswordRequest(userEmail);
+      if (!data.delivered) {
+        toast('Code re-issued — check the backend logs (SMTP not configured).', { icon: 'ℹ️' });
+      } else {
+        toast.success('A new code has been sent');
+      }
+      setCooldown(data.resend_cooldown_seconds || 60);
+      setDigits(Array(OTP_LENGTH).fill(''));
+      inputsRef.current[0]?.focus();
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Could not resend';
+      toast.error(typeof msg === 'string' ? msg : 'Could not resend');
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const otpValue = digits.join('');
+
+  const setDigitAt = (idx, val) => {
+    setDigits((prev) => { const next = [...prev]; next[idx] = val; return next; });
+  };
+
+  const handleOtpChange = (idx, e) => {
+    const raw = e.target.value.replace(/\D/g, '');
+    if (!raw) { setDigitAt(idx, ''); return; }
+    if (raw.length > 1) {
+      const chars = raw.slice(0, OTP_LENGTH - idx).split('');
+      setDigits((prev) => { const next = [...prev]; chars.forEach((c, i) => { next[idx + i] = c; }); return next; });
+      inputsRef.current[Math.min(idx + chars.length, OTP_LENGTH - 1)]?.focus();
+      return;
+    }
+    setDigitAt(idx, raw);
+    if (idx < OTP_LENGTH - 1) inputsRef.current[idx + 1]?.focus();
+  };
+
+  const handleOtpKeyDown = (idx, e) => {
+    if (e.key === 'Backspace' && !digits[idx] && idx > 0) { inputsRef.current[idx - 1]?.focus(); setDigitAt(idx - 1, ''); }
+    if (e.key === 'ArrowLeft' && idx > 0) inputsRef.current[idx - 1]?.focus();
+    if (e.key === 'ArrowRight' && idx < OTP_LENGTH - 1) inputsRef.current[idx + 1]?.focus();
+  };
+
+  const handleOtpPaste = (e) => {
+    const text = (e.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, OTP_LENGTH);
+    if (!text) return;
+    e.preventDefault();
+    const next = Array(OTP_LENGTH).fill('');
+    text.split('').forEach((c, i) => { next[i] = c; });
+    setDigits(next);
+    inputsRef.current[Math.min(text.length, OTP_LENGTH - 1)]?.focus();
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otpValue.length !== OTP_LENGTH) { toast.error(`Please enter all ${OTP_LENGTH} digits`); return; }
+    setSubmitting(true);
+    try {
+      const { verifyOtpRequest } = await import('../../services/api');
+      const data = await verifyOtpRequest(userEmail, otpValue);
+      if (data?.reset_token) {
+        toast.success('Code verified! Set your new password.');
+        setResetToken(data.reset_token);
+        setNewPwd('');
+        setConfirmPwd('');
+        setMode('resetPwd');
+      } else {
+        toast.error('Verification failed');
+      }
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Invalid code';
+      toast.error(typeof msg === 'string' ? msg : 'Invalid code');
+      setDigits(Array(OTP_LENGTH).fill(''));
+      inputsRef.current[0]?.focus();
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!allGoodReset) { toast.error('Please satisfy all password requirements'); return; }
+    setSubmitting(true);
+    try {
+      const { resetPasswordRequest } = await import('../../services/api');
+      await resetPasswordRequest(resetToken, newPwd);
+      toast.success('Password reset successfully!');
+      setMode('done');
+    } catch (err) {
+      const msg = err?.response?.data?.detail || 'Could not reset password';
+      toast.error(typeof msg === 'string' ? msg : 'Could not reset password');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   return (
-    <>
-      <div className="mt-5 pt-5 border-t border-slate-200">
-        <button
-          type="button"
-          onClick={() => setOpen((o) => !o)}
-          disabled={disabled}
-          className="w-full flex items-center justify-between group disabled:opacity-50"
-        >
-          <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
-            <Lock className="h-4 w-4 text-slate-500" />
-            Change password
-          </span>
-          {open ? (
-            <ChevronUp className="h-4 w-4 text-slate-400" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
-          )}
-        </button>
-
-        {open && (
-          <div className="mt-4 space-y-3">
-            <PwdInput
-              label="Current password"
-              value={currentPwd}
-              onChange={setCurrentPwd}
-              show={showCurrent}
-              toggleShow={() => setShowCurrent((s) => !s)}
-              disabled={submitting || disabled}
-              autoComplete="current-password"
-            />
-            <PwdInput
-              label="New password"
-              value={newPwd}
-              onChange={setNewPwd}
-              show={showNew}
-              toggleShow={() => setShowNew((s) => !s)}
-              disabled={submitting || disabled}
-              autoComplete="new-password"
-            />
-            <PwdInput
-              label="Confirm new password"
-              value={confirmPwd}
-              onChange={setConfirmPwd}
-              show={showNew}
-              toggleShow={() => setShowNew((s) => !s)}
-              disabled={submitting || disabled}
-              autoComplete="new-password"
-            />
-
-            <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pt-1">
-              <StrengthCheck ok={checks.length} text="At least 8 characters" />
-              <StrengthCheck ok={checks.upper} text="Uppercase letter" />
-              <StrengthCheck ok={checks.lower} text="Lowercase letter" />
-              <StrengthCheck ok={checks.digit} text="Number" />
-              <StrengthCheck ok={checks.special} text="Special character" />
-              <StrengthCheck ok={checks.match} text="Passwords match" />
-              <StrengthCheck ok={checks.different} text="Different from current" />
-            </ul>
-
-            <div className="flex items-center justify-between pt-1">
-              <button
-                type="button"
-                onClick={() => setForgotOpen(true)}
-                disabled={submitting || disabled}
-                className="text-xs text-brand-600 hover:text-brand-700 font-medium disabled:opacity-50"
-              >
-                Forgot password?
-              </button>
-              <button
-                type="button"
-                onClick={handleChange}
-                disabled={submitting || disabled || !allGood}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
-              >
-                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-                {submitting ? 'Changing…' : 'Change password'}
-              </button>
-            </div>
-          </div>
+    <div className="mt-5 pt-5 border-t border-slate-200">
+      <button
+        type="button"
+        onClick={() => { setOpen((o) => !o); if (open) resetAll(); }}
+        disabled={disabled}
+        className="w-full flex items-center justify-between group disabled:opacity-50"
+      >
+        <span className="flex items-center gap-2 text-sm font-medium text-slate-700">
+          <Lock className="h-4 w-4 text-slate-500" />
+          Change password
+        </span>
+        {open ? (
+          <ChevronUp className="h-4 w-4 text-slate-400" />
+        ) : (
+          <ChevronDown className="h-4 w-4 text-slate-400" />
         )}
-      </div>
+      </button>
 
-      {forgotOpen && (
-        <ForgotPasswordModal
-          initialEmail={userEmail || ''}
-          onClose={() => setForgotOpen(false)}
-          onResetComplete={() => {
-            toast.success('Password reset. Please sign in again with your new password.');
-            setForgotOpen(false);
-            setOpen(false);
-          }}
-        />
+      {open && mode === 'normal' && (
+        <div className="mt-4 space-y-3">
+          <PwdInput
+            label="Current password"
+            value={currentPwd}
+            onChange={setCurrentPwd}
+            show={showCurrent}
+            toggleShow={() => setShowCurrent((s) => !s)}
+            disabled={submitting || disabled}
+            autoComplete="current-password"
+          />
+          <PwdInput
+            label="New password"
+            value={newPwd}
+            onChange={setNewPwd}
+            show={showNew}
+            toggleShow={() => setShowNew((s) => !s)}
+            disabled={submitting || disabled}
+            autoComplete="new-password"
+          />
+          <PwdInput
+            label="Confirm new password"
+            value={confirmPwd}
+            onChange={setConfirmPwd}
+            show={showNew}
+            toggleShow={() => setShowNew((s) => !s)}
+            disabled={submitting || disabled}
+            autoComplete="new-password"
+          />
+
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pt-1">
+            <StrengthCheck ok={checks.length} text="At least 8 characters" />
+            <StrengthCheck ok={checks.upper} text="Uppercase letter" />
+            <StrengthCheck ok={checks.lower} text="Lowercase letter" />
+            <StrengthCheck ok={checks.digit} text="Number" />
+            <StrengthCheck ok={checks.special} text="Special character" />
+            <StrengthCheck ok={checks.match} text="Passwords match" />
+            <StrengthCheck ok={checks.different} text="Different from current" />
+          </ul>
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={handleForgotClick}
+              disabled={submitting || disabled}
+              className="text-xs text-brand-600 hover:text-brand-700 font-medium disabled:opacity-50"
+            >
+              {submitting && mode === 'sendingOtp' ? 'Sending OTP…' : 'Forgot password?'}
+            </button>
+            <button
+              type="button"
+              onClick={handleChange}
+              disabled={submitting || disabled || !allGoodNormal}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting ? 'Changing…' : 'Change password'}
+            </button>
+          </div>
+        </div>
       )}
-    </>
+
+      {open && mode === 'sendingOtp' && (
+        <div className="mt-4 flex items-center justify-center py-6">
+          <Loader2 className="h-5 w-5 animate-spin text-brand-600" />
+          <span className="ml-2 text-sm text-slate-500">Sending verification code…</span>
+        </div>
+      )}
+
+      {open && mode === 'otp' && (
+        <div className="mt-4 space-y-3">
+          <p className="text-sm text-slate-600">
+            We sent a 6-digit code to <span className="font-medium text-slate-800">{userEmail}</span>.
+          </p>
+
+          <div className="flex justify-center gap-2" onPaste={handleOtpPaste}>
+            {digits.map((d, i) => (
+              <input
+                key={i}
+                ref={(el) => { inputsRef.current[i] = el; }}
+                type="text"
+                inputMode="numeric"
+                maxLength={OTP_LENGTH}
+                value={d}
+                onChange={(e) => handleOtpChange(i, e)}
+                onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                disabled={submitting}
+                className="h-11 w-10 text-center text-lg font-semibold rounded-lg border border-slate-200 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none disabled:bg-slate-50"
+              />
+            ))}
+          </div>
+
+          <div className="text-center text-xs text-slate-500">
+            Didn&apos;t receive a code?{' '}
+            {cooldown > 0 ? (
+              <span className="text-slate-400">Resend in {cooldown}s</span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleResendOtp}
+                disabled={resending || submitting}
+                className="text-brand-600 hover:text-brand-700 font-medium disabled:opacity-50"
+              >
+                {resending ? 'Sending…' : 'Resend code'}
+              </button>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-1">
+            <button
+              type="button"
+              onClick={() => { setMode('normal'); setDigits(Array(OTP_LENGTH).fill('')); }}
+              disabled={submitting}
+              className="text-xs text-slate-500 hover:text-slate-700 disabled:opacity-50"
+            >
+              ← Back
+            </button>
+            <button
+              type="button"
+              onClick={handleVerifyOtp}
+              disabled={submitting || otpValue.length !== OTP_LENGTH}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting ? 'Verifying…' : 'Verify code'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {open && mode === 'resetPwd' && (
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium">
+            <CheckCircle2 className="h-4 w-4" />
+            OTP verified — set your new password
+          </div>
+
+          <PwdInput
+            label="New password"
+            value={newPwd}
+            onChange={setNewPwd}
+            show={showNew}
+            toggleShow={() => setShowNew((s) => !s)}
+            disabled={submitting || disabled}
+            autoComplete="new-password"
+          />
+          <PwdInput
+            label="Confirm new password"
+            value={confirmPwd}
+            onChange={setConfirmPwd}
+            show={showNew}
+            toggleShow={() => setShowNew((s) => !s)}
+            disabled={submitting || disabled}
+            autoComplete="new-password"
+          />
+
+          <ul className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs pt-1">
+            <StrengthCheck ok={checks.length} text="At least 8 characters" />
+            <StrengthCheck ok={checks.upper} text="Uppercase letter" />
+            <StrengthCheck ok={checks.lower} text="Lowercase letter" />
+            <StrengthCheck ok={checks.digit} text="Number" />
+            <StrengthCheck ok={checks.special} text="Special character" />
+            <StrengthCheck ok={checks.match} text="Passwords match" />
+          </ul>
+
+          <div className="flex justify-end pt-1">
+            <button
+              type="button"
+              onClick={handleResetPassword}
+              disabled={submitting || !allGoodReset}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg text-sm font-medium bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50"
+            >
+              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {submitting ? 'Resetting…' : 'Reset password'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {open && mode === 'done' && (
+        <div className="mt-4 text-center py-4 space-y-3">
+          <div className="mx-auto h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <CheckCircle2 className="h-6 w-6" />
+          </div>
+          <p className="text-sm font-medium text-slate-800">Password reset successful!</p>
+          <button
+            type="button"
+            onClick={() => { resetAll(); setOpen(false); }}
+            className="text-xs text-brand-600 hover:text-brand-700 font-medium"
+          >
+            Done
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
